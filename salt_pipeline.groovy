@@ -17,7 +17,7 @@ stage 'Build'
                 deleteDir()
 
                 checkout scm
-                sh 'git rev-parse --verify HEAD > ../commit'
+                sh 'git rev-parse --verify HEAD > commit'
 
                 // Set GIT_COMMIT env variable
                 env.GIT_COMMIT = readFile 'commit'
