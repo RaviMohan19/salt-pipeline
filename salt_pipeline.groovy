@@ -13,7 +13,7 @@ stage 'Build'
     node() {
         withEnv(env_vars) {
             try {
-                // Clear the workspace.
+                // Clear the workspace
                 deleteDir()
 
                 checkout scm
