@@ -13,6 +13,9 @@ stage 'Build'
     node() {
         withEnv(env_vars) {
             try {
+                // Clear the workspace.
+                deleteDir()
+
                 checkout scm
                 sh 'git rev-parse --verify HEAD > ../commit'
 
