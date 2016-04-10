@@ -10,7 +10,7 @@ def JENKINS_GIT_CREDENTIAL_ID = 'f35a0dab-572d-43aa-a289-319ef3a3445d'
 def env_vars = ["FORMULA_NAME=${env.FORMULA_NAME}"]
 
 // Setup container
-def DOCKER_PARAMS = "--tty --detach "
+def DOCKER_PARAMS = "-u 0"
 def container = docker.image('ubuntu:14.04')
 
 stage 'Build'
@@ -39,7 +39,7 @@ stage 'Build'
 stage 'QA'
     node() {
         try {
-            container.inside() {
+            container.inside(DOCKER_PARAMS) {
                 withEnv(env_vars) {
                     sh '''
                     echo 'Install salt-minion'
