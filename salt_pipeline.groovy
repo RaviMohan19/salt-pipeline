@@ -38,7 +38,7 @@ stage 'Build'
             echo 'Running code analysis'
 
             echo 'shellcheck...'
-            sh "${DOCKER_EXEC} sh -c 'find . -name *.sh | while read line; do shellcheck \$line; done'"
+            sh "${DOCKER_EXEC} sh -c 'find . -name *.sh | while read line; do /root/.cabal/bin/shellcheck \$line; done'"
 
             echo 'flake8...'
             sh "${DOCKER_EXEC} flake8 ."
