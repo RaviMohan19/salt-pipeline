@@ -4,7 +4,7 @@
 echo "FORMULA_NAME: ${env.FORMULA_NAME}"
 
 // Set credentials
-def JENKINS_GIT_CREDENTIAL_ID = 'f35a0dab-572d-43aa-a289-319ef3a3445d'
+def JENKINS_GIT_CREDENTIAL_ID = 'ryancurrah'
 
 // Set environment variables
 def env_vars = ["FORMULA_NAME=${env.FORMULA_NAME}"]
@@ -76,26 +76,29 @@ if (env.BRANCH_NAME == 'master') {
     stage name: 'Production', concurrency: 1
         node() {
             try {
-                withEnv(env_vars) {
-                    sh '''
-                    echo "Promoting Salt formula..."
-                    CURRENT_VERSION=$(git tag -l | sort --version-sort | tail -1)
-                    if [ -z ${CURRENT_VERSION} ]
-                    then
-                        CURRENT_VERSION='v0.0.0'
-                    fi
+                sshagent([JENKINS_GIT_CREDENTIAL_ID]) {
+                    withEnv(env_vars) {
+                        sh '''
+                        echo "Promoting Salt formula..."
+                        CURRENT_VERSION=$(git tag -l | sort --version-sort | tail -1)
+                        if [ -z ${CURRENT_VERSION} ]
+                        then
+                            CURRENT_VERSION='v0.0.0'
+                        fi
 
-                    git config user.email "ryan@currah.ca"
-                    git config user.name "ryancurrah"
+                        git config user.email "ryan@currah.ca"
+                        git config user.name "ryancurrah"
 
-                    bumpversion --verbose --current-version ${CURRENT_VERSION} --tag part
-                    git tag latest -f
-                    git push origin HEAD:master --tags --force
-                    echo "...Promotion complete"
-                    '''
+                        bumpversion --verbose --current-version ${CURRENT_VERSION} --tag part
+                        git tag latest -f
 
-                    sh "${DOCKER_KILL}"
-                    currentBuild.result = 'SUCCESS'
+                        git push origin HEAD:master --tags --force
+                        echo "...Promotion complete"
+                        '''
+
+                        sh "${DOCKER_KILL}"
+                        currentBuild.result = 'SUCCESS'
+                    }
                 }
             }
             catch (err) {
