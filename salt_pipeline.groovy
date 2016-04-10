@@ -68,9 +68,10 @@ stage 'Build'
 stage 'QA'
     node() {
         try {
-            // Run tests
-            sh "${DOCKER_EXEC} sh -c 'cd tests; rspec'"
-
+            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm', 'defaultFg': 1, 'defaultBg': 2]) {
+                // Run tests
+                sh "${DOCKER_EXEC} sh -c 'cd tests; rspec'"
+            }
             if (env.BRANCH_NAME != 'master') {
                 currentBuild.result = 'SUCCESS'
             }
