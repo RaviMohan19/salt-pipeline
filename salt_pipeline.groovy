@@ -34,7 +34,6 @@ stage 'Build'
             echo 'Running code analysis'
             sh """
             echo 'flake8...'
-            ${DOCKER_EXEC} flake8 .
             sh "${DOCKER_EXEC} flake8 ."
 
             echo 'shellcheck...'
