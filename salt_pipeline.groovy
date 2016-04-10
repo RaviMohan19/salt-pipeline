@@ -41,9 +41,7 @@ stage 'QA'
     node() {
         try {
             withEnv(env_vars) {
-                sh '''
                 sh "${DOCKER_EXEC} ls"
-                '''
 
                 if (env.BRANCH_NAME != 'master') {
                     currentBuild.result = 'SUCCESS'
