@@ -18,6 +18,11 @@ stage 'Build'
         try {
             // Clear the workspace
             deleteDir()
+
+            // Test env variable
+            sh 'echo ${FORMULA_NAME}'
+
+            // Checkout code
             checkout scm
             sh 'git rev-parse --verify HEAD > commit'
 
