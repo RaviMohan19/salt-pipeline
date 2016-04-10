@@ -34,28 +34,26 @@ stage 'Build'
             // Run docker container
             sh "${DOCKER_RUN}"
 
-            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm', 'defaultFg': 1, 'defaultBg': 2]) {
-                // Code analysis
-                echo 'Running code analysis'
+            // Code analysis
+            echo 'Running code analysis'
 
-                echo 'shellcheck...'
-                sh "${DOCKER_EXEC} sh -c 'find . -name *.sh | while read line; do /root/.cabal/bin/shellcheck \$line; done'"
+            echo 'shellcheck...'
+            sh "${DOCKER_EXEC} sh -c 'find . -name *.sh | while read line; do /root/.cabal/bin/shellcheck \$line; done'"
 
-                echo 'flake8...'
-                sh "${DOCKER_EXEC} flake8 ."
+            echo 'flake8...'
+            sh "${DOCKER_EXEC} flake8 ."
 
-                // Setup testing environment
-                sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
-                sh "${DOCKER_EXEC} mkdir -p /tmp/states"
-                sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
-                sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
+            // Setup testing environment
+            sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
+            sh "${DOCKER_EXEC} mkdir -p /tmp/states"
+            sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
+            sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
 
-                // Install Gemfile requirements for serverspec
-                sh "${DOCKER_EXEC} gem install --file tests/Gemfile"
+            // Install Gemfile requirements for serverspec
+            sh "${DOCKER_EXEC} gem install --file tests/Gemfile"
 
-                // Run highstate
-                sh "${DOCKER_EXEC} salt-call state.highstate"
-            }
+            // Run highstate
+            sh "${DOCKER_EXEC} salt-call state.highstate"
         }
         catch (err) {
             echo "Caught: ${err}"
@@ -68,10 +66,9 @@ stage 'Build'
 stage 'QA'
     node() {
         try {
-            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm', 'defaultFg': 1, 'defaultBg': 2]) {
-                // Run tests
-                sh "${DOCKER_EXEC} sh -c 'cd tests; rspec'"
-            }
+            // Run tests
+            sh "${DOCKER_EXEC} sh -c 'cd tests; rspec'"
+
             if (env.BRANCH_NAME != 'master') {
                 currentBuild.result = 'SUCCESS'
             }
