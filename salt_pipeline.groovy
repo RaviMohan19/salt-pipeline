@@ -19,6 +19,9 @@ def DOCKER_KILL = 'docker kill $(cat container_id)'
 stage 'Build'
     node() {
         try {
+            // Clear the workspace
+            deleteDir()
+
             withEnv(env_vars) {
                 checkout scm
                 sh 'git rev-parse --verify HEAD > commit'
