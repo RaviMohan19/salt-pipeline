@@ -36,11 +36,12 @@ stage 'Build'
 
             // Code analysis
             echo 'Running code analysis'
-            echo 'flake8...'
-            sh "${DOCKER_EXEC} flake8 ."
 
             echo 'shellcheck...'
             sh "${DOCKER_EXEC} sh -c 'find . -name *.sh | while read line; do shellcheck $line; done'"
+
+            echo 'flake8...'
+            sh "${DOCKER_EXEC} flake8 ."
 
             // Setup testing environment
             sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
