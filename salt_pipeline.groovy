@@ -54,7 +54,9 @@ stage 'QA'
         try {
             withEnv(env_vars) {
                 // Run tests
-                sh "${DOCKER_EXEC} cd tests && rspec"
+                dir('tests'){
+                    sh "${DOCKER_EXEC} rspec"
+                }
 
                 if (env.BRANCH_NAME != 'master') {
                     currentBuild.result = 'SUCCESS'
