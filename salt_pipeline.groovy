@@ -27,6 +27,9 @@ stage 'Build'
                 echo "GIT_COMMIT: ${env.GIT_COMMIT}"
 
                 sh "${DOCKER_RUN}"
+                sh "${DOCKER_EXEC} mkdir -p /tmp/states"
+                sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
+                sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
             }
         }
         catch (err) {
@@ -41,8 +44,6 @@ stage 'QA'
     node() {
         try {
             withEnv(env_vars) {
-                sh "${DOCKER_EXEC} mkdir -p /tmp/state"
-                sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/state"
 
                 if (env.BRANCH_NAME != 'master') {
                     currentBuild.result = 'SUCCESS'
