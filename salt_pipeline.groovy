@@ -36,6 +36,9 @@ stage 'Build'
                 sh "${DOCKER_EXEC} mkdir -p /tmp/states"
                 sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
                 sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
+
+                // Run highstate
+                sh "${DOCKER_EXEC} salt-call state.highstate"
             }
         }
         catch (err) {
@@ -50,6 +53,8 @@ stage 'QA'
     node() {
         try {
             withEnv(env_vars) {
+                // Run tests
+                sh "${DOCKER_EXEC} cd tests && rspec"
 
                 if (env.BRANCH_NAME != 'master') {
                     currentBuild.result = 'SUCCESS'
