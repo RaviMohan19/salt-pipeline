@@ -35,6 +35,7 @@ stage 'Build'
                 sh "${DOCKER_RUN}"
 
                 echo 'Running code analysis'
+
                 echo 'flake8 analysis...'
                 sh "${DOCKER_EXEC} flake8 ."
                 echo '...flake8 done'
@@ -45,6 +46,7 @@ stage 'Build'
                     ${DOCKER_EXEC} shellcheck $line
                 done
                 '''
+                echo '...shellcheck done'
 
                 // Setup testing environment
                 sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
