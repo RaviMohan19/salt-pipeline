@@ -26,7 +26,10 @@ stage 'Build'
                 env.GIT_COMMIT = env.GIT_COMMIT.trim()
                 echo "GIT_COMMIT: ${env.GIT_COMMIT}"
 
+                // Run docker container
                 sh "${DOCKER_RUN}"
+
+                // Setup testing environment
                 sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
                 sh "${DOCKER_EXEC} mkdir -p /tmp/states"
                 sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
