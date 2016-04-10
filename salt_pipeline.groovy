@@ -16,10 +16,6 @@ def DOCKER_RUN = 'docker run --privileged -u root -d -i -t -w "$(pwd)" ' +
 def DOCKER_EXEC = 'docker exec -i $(cat container_id)'
 def DOCKER_KILL = 'docker kill $(cat container_id)'
 
-// Set env variables
-env.DOCKER_EXEC = DOCKER_EXEC
-env.DOCKER_KILL = DOCKER_KILL
-
 stage 'Build'
     node() {
         try {
@@ -39,15 +35,15 @@ stage 'Build'
                 sh "${DOCKER_RUN}"
 
                 echo 'Running code analysis'
-                sh '''
-                echo "flake8..."
+                sh """
+                echo 'flake8...'
                 ${DOCKER_EXEC} flake8 .
 
-                echo "shellcheck..."
+                echo 'shellcheck...'
                 find . -name '*.sh' | while read line; do
                     ${DOCKER_EXEC} shellcheck $line
                 done
-                '''
+                """
 
                 // Setup testing environment
                 sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
