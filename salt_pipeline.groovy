@@ -95,7 +95,7 @@ if (env.BRANCH_NAME == 'master') {
                         git config user.email "ryan@currah.ca"
                         git config user.name "ryancurrah"
 
-                        bumpversion --verbose --current-version ${CURRENT_VERSION} --tag part
+                        bumpversion --verbose --current-version ${CURRENT_VERSION} --tag minor
                         git tag latest -f
 
                         git push origin HEAD:master --tags --force
