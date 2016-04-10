@@ -34,6 +34,9 @@ stage 'Build'
                 // Run docker container
                 sh "${DOCKER_RUN}"
 
+                echo 'Running code analysis'
+                sh "${DOCKER_EXEC} flake8 ."
+
                 // Setup testing environment
                 sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
                 sh "${DOCKER_EXEC} mkdir -p /tmp/states"
