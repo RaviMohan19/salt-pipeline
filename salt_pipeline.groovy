@@ -43,6 +43,7 @@ stage 'QA'
                 withEnv(env_vars) {
                     sh '''
                     echo 'Install salt-minion'
+                    echo $(whoami)
                     apt-get install -y curl
                     curl -o - "https://repo.saltstack.com/apt/ubuntu/$(lsb_release -sr)/amd64/latest/SALTSTACK-GPG-KEY.pub" | sudo apt-key add -
                     echo "deb http://repo.saltstack.com/apt/ubuntu/$(lsb_release -sr)/amd64/latest $(lsb_release -sc) main" > /etc/apt/sources.list.d/99-saltstack.list
