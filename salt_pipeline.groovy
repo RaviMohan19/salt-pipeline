@@ -9,9 +9,10 @@ def JENKINS_GIT_CREDENTIAL_ID = 'f35a0dab-572d-43aa-a289-319ef3a3445d'
 // Set environment variables
 def env_vars = ["FORMULA_NAME=${env.FORMULA_NAME}"]
 
-// Setup container, make sure docker user is root
-def DOCKER_PARAMS = "-u 0"
-def container = docker.image('ubuntu:14.04')
+// Docker stuff
+def DOCKER_RUN = 'docker run -u root -d -i -t -w "$(pwd)" -v "$(pwd):$(pwd)" centos7-salt-minion:latest /usr/sbin/init > container_id'
+def DOCKER_CMD = 'docker exec -i -t $(echo container_id)'
+def DOCKER_KILL = 'docker kill $(cat container_id)'
 
 stage 'Build'
     node() {
@@ -24,11 +25,14 @@ stage 'Build'
                 env.GIT_COMMIT = readFile 'commit'
                 env.GIT_COMMIT = env.GIT_COMMIT.trim()
                 echo "GIT_COMMIT: ${env.GIT_COMMIT}"
+
+                sh "${DOCKER_RUN}"
             }
         }
         catch (err) {
             echo "Caught: ${err}"
             currentBuild.result = 'FAILURE'
+            sh "${DOCKER_KILL}"
             error err.getMessage()
         }
     }
@@ -36,23 +40,13 @@ stage 'Build'
 stage 'QA'
     node() {
         try {
-            container.inside(DOCKER_PARAMS) {
-                withEnv(env_vars) {
-                    sh '''
-                    apt-get update
-                    apt-get install -y curl
-                    apt-get install -y git
-                    apt-get install -y ruby2.0
-                    apt-get install -y python-pip
-                    curl -o - "https://repo.saltstack.com/apt/ubuntu/$(lsb_release -sr)/amd64/latest/SALTSTACK-GPG-KEY.pub" | sudo apt-key add -
-                    echo "deb http://repo.saltstack.com/apt/ubuntu/$(lsb_release -sr)/amd64/latest $(lsb_release -sc) main" > /etc/apt/sources.list.d/99-saltstack.list
-                    apt-get install -y salt-minion
-                    service salt-minion stop
-                    '''
+            withEnv(env_vars) {
+                sh '''
+                sh "${DOCKER_EXEC ls}"
+                '''
 
-                    if (env.BRANCH_NAME != 'master') {
-                        currentBuild.result = 'SUCCESS'
-                    }
+                if (env.BRANCH_NAME != 'master') {
+                    currentBuild.result = 'SUCCESS'
                 }
             }
         }
@@ -67,15 +61,13 @@ if (env.BRANCH_NAME == 'master') {
     stage name: 'Production', concurrency: 1
         node() {
             try {
-                container.inside(DOCKER_PARAMS) {
-                    withEnv(env_vars) {
-                        sh '''
-                        echo "Promoting Salt formula..."
+                withEnv(env_vars) {
+                    sh '''
+                    echo "Promoting Salt formula..."
 
-                        echo "...Promotion complete"
-                        '''
-                        currentBuild.result = 'SUCCESS'
-                    }
+                    echo "...Promotion complete"
+                    '''
+                    currentBuild.result = 'SUCCESS'
                 }
             }
             catch (err) {
