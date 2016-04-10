@@ -34,26 +34,28 @@ stage 'Build'
             // Run docker container
             sh "${DOCKER_RUN}"
 
-            // Code analysis
-            echo 'Running code analysis'
+            wrap([$class: 'AnsiColorSimpleBuildWrapper', colorMapName: "xterm"]) {
+                // Code analysis
+                echo 'Running code analysis'
 
-            echo 'shellcheck...'
-            sh "${DOCKER_EXEC} sh -c 'find . -name *.sh | while read line; do /root/.cabal/bin/shellcheck \$line; done'"
+                echo 'shellcheck...'
+                sh "${DOCKER_EXEC} sh -c 'find . -name *.sh | while read line; do /root/.cabal/bin/shellcheck \$line; done'"
 
-            echo 'flake8...'
-            sh "${DOCKER_EXEC} flake8 ."
+                echo 'flake8...'
+                sh "${DOCKER_EXEC} flake8 ."
 
-            // Setup testing environment
-            sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
-            sh "${DOCKER_EXEC} mkdir -p /tmp/states"
-            sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
-            sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
+                // Setup testing environment
+                sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
+                sh "${DOCKER_EXEC} mkdir -p /tmp/states"
+                sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
+                sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
 
-            // Install Gemfile requirements for serverspec
-            sh "${DOCKER_EXEC} gem install --file tests/Gemfile"
+                // Install Gemfile requirements for serverspec
+                sh "${DOCKER_EXEC} gem install --file tests/Gemfile"
 
-            // Run highstate
-            sh "${DOCKER_EXEC} salt-call state.highstate"
+                // Run highstate
+                sh "${DOCKER_EXEC} salt-call state.highstate"
+            }
         }
         catch (err) {
             echo "Caught: ${err}"
