@@ -82,7 +82,7 @@ if (env.BRANCH_NAME == 'master') {
                     CURRENT_VERSION=$(git tag -l | sort --version-sort | tail -1)
                     if [ -z ${CURRENT_VERSION} ]
                     then
-                        CURRENT_VERSION='v0.0.1'
+                        CURRENT_VERSION='v0.0.0'
                     fi
 
                     git config user.email "ryan@currah.ca"
