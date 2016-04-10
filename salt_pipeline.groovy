@@ -79,7 +79,16 @@ if (env.BRANCH_NAME == 'master') {
                 withEnv(env_vars) {
                     sh '''
                     echo "Promoting Salt formula..."
+                    CURRENT_VERSION=$(git tag -l | sort --version-sort | tail -1)
+                    if [ -z ${CURRENT_VERSION} ]
+                    then
+                        CURRENT_VERSION='v0.0.1'
+                    fi
 
+                    git config user.email "ryan@currah.ca"
+                    git config user.name "ryancurrah"
+
+                    bumpversion --verbose --current-version ${CURRENT_VERSION} --tag part
                     echo "...Promotion complete"
                     '''
 
