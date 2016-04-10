@@ -10,7 +10,7 @@ def JENKINS_GIT_CREDENTIAL_ID = 'f35a0dab-572d-43aa-a289-319ef3a3445d'
 def env_vars = ["FORMULA_NAME=${env.FORMULA_NAME}"]
 
 // Docker stuff
-def DOCKER_RUN = 'docker run -u root -d -i -t -w "$(pwd)" -v "/sys/fs/cgroup:/sys/fs/cgroup:ro" -v "$(pwd):$(pwd)" centos7-salt-minion:latest /usr/sbin/init > container_id'
+def DOCKER_RUN = 'docker run --privileged -u root -d -i -t -w "$(pwd)" -v "/sys/fs/cgroup:/sys/fs/cgroup:ro" -v "$(pwd):$(pwd)" centos7-salt-minion:latest /usr/sbin/init > container_id'
 def DOCKER_EXEC = 'docker exec -i $(cat container_id)'
 def DOCKER_KILL = 'docker kill $(cat container_id)'
 
