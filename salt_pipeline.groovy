@@ -42,7 +42,15 @@ stage 'QA'
             container.inside() {
                 withEnv(env_vars) {
                     sh '''
-                    echo 'running tests'
+                    echo 'Install salt-minion'
+                    apt-get install -y curl
+                    curl -o - "https://repo.saltstack.com/apt/ubuntu/$(lsb_release -sr)/amd64/latest/SALTSTACK-GPG-KEY.pub" | sudo apt-key add -
+                    echo "deb http://repo.saltstack.com/apt/ubuntu/$(lsb_release -sr)/amd64/latest $(lsb_release -sc) main" > /etc/apt/sources.list.d/99-saltstack.list
+                    apt-get install -y git
+                    apt-get install -y python-pip
+                    apt-get install -y ruby2.0
+                    apt-get install -y salt-minion
+                    service salt-minion stop
                     '''
 
                     if (env.BRANCH_NAME != 'master') {
