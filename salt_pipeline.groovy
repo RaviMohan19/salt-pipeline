@@ -36,6 +36,8 @@ stage 'Build'
                 sh "${DOCKER_EXEC} mkdir -p /tmp/states"
                 sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
                 sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
+
+                // Install Gemfile requirements for serverspec
                 sh "${DOCKER_EXEC} gem install --file tests/Gemfile"
 
                 // Run highstate
