@@ -41,7 +41,8 @@ stage 'QA'
     node() {
         try {
             withEnv(env_vars) {
-                sh "${DOCKER_EXEC} ls"
+                sh "${DOCKER_EXEC} mkdir -p /tmp/state"
+                sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/state"
 
                 if (env.BRANCH_NAME != 'master') {
                     currentBuild.result = 'SUCCESS'
