@@ -34,7 +34,7 @@ stage 'Build'
             // Run docker container
             sh "${DOCKER_RUN}"
 
-            wrap([$class: 'AnsiColorBuildWrapper', colorMapName: "xterm"]) {
+            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm', 'defaultFg': 1, 'defaultBg': 2]) {
                 // Code analysis
                 echo 'Running code analysis'
 
