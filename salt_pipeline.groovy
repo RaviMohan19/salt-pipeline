@@ -89,6 +89,8 @@ if (env.BRANCH_NAME == 'master') {
                     git config user.name "ryancurrah"
 
                     bumpversion --verbose --current-version ${CURRENT_VERSION} --tag part
+                    git tag latest -f
+                    git push origin HEAD:master --tags --force
                     echo "...Promotion complete"
                     '''
 
