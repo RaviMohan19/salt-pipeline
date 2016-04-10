@@ -66,7 +66,7 @@ stage 'Build'
 stage 'QA'
     node() {
         try {
-            // Run tests
+            // Run tests w/ color
             wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm',
                   'defaultFg': 1, 'defaultBg': 2]) {
                 sh "${DOCKER_EXEC} sh -c 'cd tests; rspec'"
