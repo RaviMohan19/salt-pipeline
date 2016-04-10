@@ -6,9 +6,6 @@ echo "FORMULA_NAME: ${env.FORMULA_NAME}"
 // Set credentials
 def JENKINS_GIT_CREDENTIAL_ID = 'ryancurrah'
 
-// Set environment variables
-def env_vars = ["FORMULA_NAME=${env.FORMULA_NAME}"]
-
 // Docker stuff
 def DOCKER_RUN = 'docker run --privileged -u root -d -i -t -w "$(pwd)" ' +
                  '-v "/sys/fs/cgroup:/sys/fs/cgroup:ro" -v "$(pwd):$(pwd)" ' +
@@ -21,42 +18,40 @@ stage 'Build'
         try {
             // Clear the workspace
             deleteDir()
+            checkout scm
+            sh 'git rev-parse --verify HEAD > commit'
 
-            withEnv(env_vars) {
-                checkout scm
-                sh 'git rev-parse --verify HEAD > commit'
+            // Set GIT_COMMIT env variable
+            env.GIT_COMMIT = readFile 'commit'
+            env.GIT_COMMIT = env.GIT_COMMIT.trim()
+            echo "GIT_COMMIT: ${env.GIT_COMMIT}"
 
-                // Set GIT_COMMIT env variable
-                env.GIT_COMMIT = readFile 'commit'
-                env.GIT_COMMIT = env.GIT_COMMIT.trim()
-                echo "GIT_COMMIT: ${env.GIT_COMMIT}"
+            // Run docker container
+            sh "${DOCKER_RUN}"
 
-                // Run docker container
-                sh "${DOCKER_RUN}"
 
-                echo 'Running code analysis'
-                sh """
-                echo 'flake8...'
-                ${DOCKER_EXEC} flake8 .
 
-                echo 'shellcheck...'
-                find . -name '*.sh' | while read line; do
-                    ${DOCKER_EXEC} shellcheck $line
-                done
-                """
+            echo 'Running code analysis'
+            sh """
+            echo 'flake8...'
+            ${DOCKER_EXEC} flake8 .
+            sh "${DOCKER_EXEC} flake8 ."
 
-                // Setup testing environment
-                sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
-                sh "${DOCKER_EXEC} mkdir -p /tmp/states"
-                sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
-                sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
+            echo 'shellcheck...'
+            sh "${DOCKER_EXEC} sh -c 'find . -name '*.sh' | while read line; do shellcheck $line; done'"
+            """
 
-                // Install Gemfile requirements for serverspec
-                sh "${DOCKER_EXEC} gem install --file tests/Gemfile"
+            // Setup testing environment
+            sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
+            sh "${DOCKER_EXEC} mkdir -p /tmp/states"
+            sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
+            sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
 
-                // Run highstate
-                sh "${DOCKER_EXEC} salt-call state.highstate"
-            }
+            // Install Gemfile requirements for serverspec
+            sh "${DOCKER_EXEC} gem install --file tests/Gemfile"
+
+            // Run highstate
+            sh "${DOCKER_EXEC} salt-call state.highstate"
         }
         catch (err) {
             echo "Caught: ${err}"
