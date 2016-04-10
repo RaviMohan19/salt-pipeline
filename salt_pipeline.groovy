@@ -29,8 +29,6 @@ stage 'Build'
             // Run docker container
             sh "${DOCKER_RUN}"
 
-
-
             echo 'Running code analysis'
             sh """
             echo 'flake8...'
