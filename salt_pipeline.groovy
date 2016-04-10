@@ -3,11 +3,15 @@
  */
 echo "FORMULA_NAME: ${env.FORMULA_NAME}"
 
-// Credentials
+// Set credentials
 def JENKINS_GIT_CREDENTIAL_ID = 'f35a0dab-572d-43aa-a289-319ef3a3445d'
 
+// Set environment variables
 def env_vars = ["FORMULA_NAME=${env.FORMULA_NAME}"]
 
+// Setup container
+def DOCKER_PARAMS = "--tty --detach "
+def container = docker.image('ubuntu:14.04')
 
 stage 'Build'
     node() {
@@ -34,20 +38,22 @@ stage 'Build'
 
 stage 'QA'
     node() {
-        withEnv(env_vars) {
-            try {
-                sh '''
-                echo 'running tests'
-                '''
+        container.inside(DOCKER_PARAMS) {
+            withEnv(env_vars) {
+                try {
+                    sh '''
+                    echo 'running tests'
+                    '''
 
-                if (env.BRANCH_NAME != 'master') {
-                    currentBuild.result = 'SUCCESS'
+                    if (env.BRANCH_NAME != 'master') {
+                        currentBuild.result = 'SUCCESS'
+                    }
                 }
-            }
-            catch (err) {
-                echo "Caught: ${err}"
-                currentBuild.result = 'FAILURE'
-                error err.getMessage()
+                catch (err) {
+                    echo "Caught: ${err}"
+                    currentBuild.result = 'FAILURE'
+                    error err.getMessage()
+                }
             }
         }
     }
