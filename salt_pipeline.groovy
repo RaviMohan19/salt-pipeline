@@ -27,6 +27,7 @@ stage 'Build'
                 echo "GIT_COMMIT: ${env.GIT_COMMIT}"
 
                 sh "${DOCKER_RUN}"
+                sh "${DOCKER_EXEC} \cp -r tests/minion /etc/salt/minion"
                 sh "${DOCKER_EXEC} mkdir -p /tmp/states"
                 sh "${DOCKER_EXEC} cp -r ${env.FORMULA_NAME} /tmp/states"
                 sh "${DOCKER_EXEC} cp -r tests/integration/defaults/* /tmp"
