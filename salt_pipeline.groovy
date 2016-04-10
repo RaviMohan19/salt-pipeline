@@ -42,7 +42,7 @@ stage 'QA'
         try {
             withEnv(env_vars) {
                 sh '''
-                sh "${DOCKER_EXEC ls}"
+                sh "${DOCKER_EXEC} ls"
                 '''
 
                 if (env.BRANCH_NAME != 'master') {
@@ -53,6 +53,7 @@ stage 'QA'
         catch (err) {
             echo "Caught: ${err}"
             currentBuild.result = 'FAILURE'
+            sh "${DOCKER_KILL}"
             error err.getMessage()
         }
     }
@@ -67,12 +68,15 @@ if (env.BRANCH_NAME == 'master') {
 
                     echo "...Promotion complete"
                     '''
+
+                    sh "${DOCKER_KILL}"
                     currentBuild.result = 'SUCCESS'
                 }
             }
             catch (err) {
                 echo "Caught: ${err}"
                 currentBuild.result = 'FAILURE'
+                sh "${DOCKER_KILL}"
                 error err.getMessage()
             }
         }
