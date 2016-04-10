@@ -16,6 +16,10 @@ def DOCKER_RUN = 'docker run --privileged -u root -d -i -t -w "$(pwd)" ' +
 def DOCKER_EXEC = 'docker exec -i $(cat container_id)'
 def DOCKER_KILL = 'docker kill $(cat container_id)'
 
+// Set env variables
+env.DOCKER_EXEC = DOCKER_EXEC
+env.DOCKER_KILL = DOCKER_KILL
+
 stage 'Build'
     node() {
         try {
