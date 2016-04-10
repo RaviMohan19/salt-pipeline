@@ -81,7 +81,7 @@ if (env.BRANCH_NAME == 'master') {
                         sh '''
                         echo "Promoting Salt formula..."
                         CURRENT_VERSION=$(git tag -l | sort --version-sort | tail -1)
-                        if [ -z ${CURRENT_VERSION} ]
+                        if [ -z $CURRENT_VERSION ]
                         then
                             CURRENT_VERSION='v0.0.0'
                         fi
