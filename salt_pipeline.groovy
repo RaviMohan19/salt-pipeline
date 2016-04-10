@@ -28,6 +28,7 @@ stage 'Build'
                 env.GIT_COMMIT = env.GIT_COMMIT.trim()
                 echo "GIT_COMMIT: ${env.GIT_COMMIT}"
             }
+        }
         catch (err) {
             echo "Caught: ${err}"
             currentBuild.result = 'FAILURE'
@@ -49,6 +50,7 @@ stage 'QA'
                     }
                 }
             }
+        }
         catch (err) {
             echo "Caught: ${err}"
             currentBuild.result = 'FAILURE'
