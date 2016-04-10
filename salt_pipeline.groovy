@@ -20,7 +20,7 @@ stage 'Build'
             deleteDir()
 
             // Test env variable
-            sh 'echo ${FORMULA_NAME}'
+            sh 'echo "FORMULA_NAME: ${FORMULA_NAME}"'
 
             // Checkout code
             checkout scm
@@ -34,14 +34,12 @@ stage 'Build'
             // Run docker container
             sh "${DOCKER_RUN}"
 
+            // Code analysis
             echo 'Running code analysis'
-            sh """
             echo 'flake8...'
             sh "${DOCKER_EXEC} flake8 ."
-
             echo 'shellcheck...'
             sh "${DOCKER_EXEC} sh -c 'find . -name '*.sh' | while read line; do shellcheck $line; done'"
-            """
 
             // Setup testing environment
             sh "${DOCKER_EXEC} \\cp -r tests/minion /etc/salt/minion"
@@ -66,13 +64,11 @@ stage 'Build'
 stage 'QA'
     node() {
         try {
-            withEnv(env_vars) {
-                // Run tests
-                sh "${DOCKER_EXEC} sh -c 'cd tests; rspec'"
+            // Run tests
+            sh "${DOCKER_EXEC} sh -c 'cd tests; rspec'"
 
-                if (env.BRANCH_NAME != 'master') {
-                    currentBuild.result = 'SUCCESS'
-                }
+            if (env.BRANCH_NAME != 'master') {
+                currentBuild.result = 'SUCCESS'
             }
         }
         catch (err) {
@@ -88,28 +84,26 @@ if (env.BRANCH_NAME == 'master') {
         node() {
             try {
                 sshagent([JENKINS_GIT_CREDENTIAL_ID]) {
-                    withEnv(env_vars) {
-                        sh '''
-                        echo "Promoting Salt formula..."
-                        CURRENT_VERSION=$(git tag -l | sort --version-sort | tail -1)
-                        if [ -z $CURRENT_VERSION ]
-                        then
-                            CURRENT_VERSION='v0.0.0'
-                        fi
+                    sh '''
+                    echo "Promoting Salt formula..."
+                    CURRENT_VERSION=$(git tag -l | sort --version-sort | tail -1)
+                    if [ -z $CURRENT_VERSION ]
+                    then
+                        CURRENT_VERSION='v0.0.0'
+                    fi
 
-                        git config user.email "ryan@currah.ca"
-                        git config user.name "ryancurrah"
+                    git config user.email "ryan@currah.ca"
+                    git config user.name "ryancurrah"
 
-                        bumpversion --current-version ${CURRENT_VERSION} --tag minor
-                        git tag latest -f
+                    bumpversion --current-version ${CURRENT_VERSION} --tag minor
+                    git tag latest -f
 
-                        git push origin HEAD:master --tags --force
-                        echo "...Promotion complete"
-                        '''
+                    git push origin HEAD:master --tags --force
+                    echo "...Promotion complete"
+                    '''
 
-                        sh "${DOCKER_KILL}"
-                        currentBuild.result = 'SUCCESS'
-                    }
+                    sh "${DOCKER_KILL}"
+                    currentBuild.result = 'SUCCESS'
                 }
             }
             catch (err) {
