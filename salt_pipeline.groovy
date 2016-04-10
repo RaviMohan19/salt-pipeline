@@ -11,7 +11,7 @@ def env_vars = ["FORMULA_NAME=${env.FORMULA_NAME}"]
 
 // Docker stuff
 def DOCKER_RUN = 'docker run -u root -d -i -t -w "$(pwd)" -v "$(pwd):$(pwd)" centos7-salt-minion:latest /usr/sbin/init > container_id'
-def DOCKER_CMD = 'docker exec -i -t $(echo container_id)'
+def DOCKER_CMD = 'docker exec -i -t $(cat container_id)'
 def DOCKER_KILL = 'docker kill $(cat container_id)'
 
 stage 'Build'
