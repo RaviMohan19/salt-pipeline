@@ -15,8 +15,8 @@ def container = docker.image('ubuntu:14.04')
 
 stage 'Build'
     node() {
-        withEnv(env_vars) {
-            try {
+        try {
+            withEnv(env_vars) {
                 // Clear the workspace
                 deleteDir()
 
@@ -28,19 +28,18 @@ stage 'Build'
                 env.GIT_COMMIT = env.GIT_COMMIT.trim()
                 echo "GIT_COMMIT: ${env.GIT_COMMIT}"
             }
-            catch (err) {
-                echo "Caught: ${err}"
-                currentBuild.result = 'FAILURE'
-                error err.getMessage()
-            }
+        catch (err) {
+            echo "Caught: ${err}"
+            currentBuild.result = 'FAILURE'
+            error err.getMessage()
         }
     }
 
 stage 'QA'
     node() {
-        container.inside(DOCKER_PARAMS) {
-            withEnv(env_vars) {
-                try {
+        try {
+            container.inside() {
+                withEnv(env_vars) {
                     sh '''
                     echo 'running tests'
                     '''
@@ -49,12 +48,11 @@ stage 'QA'
                         currentBuild.result = 'SUCCESS'
                     }
                 }
-                catch (err) {
-                    echo "Caught: ${err}"
-                    currentBuild.result = 'FAILURE'
-                    error err.getMessage()
-                }
             }
+        catch (err) {
+            echo "Caught: ${err}"
+            currentBuild.result = 'FAILURE'
+            error err.getMessage()
         }
     }
 
